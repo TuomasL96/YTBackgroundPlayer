@@ -1,39 +1,58 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import icon from '../../assets/icon.svg';
+import React, { useState } from 'react';
 import './App.css';
+import "tailwindcss/tailwind.css";
 
-function Hello() {
+function Player() {
+  const [playlistUrl, setPlaylistUrl] = useState('');
+  const [embedUrl, setEmbedUrl] = useState('');
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    const playlistIdMatch = playlistUrl.match(/list=([^&]+)/);
+    if (playlistIdMatch && playlistIdMatch[1]) {
+      const playlistId = playlistIdMatch[1]!;
+     
+      const embedUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}`;
+      setEmbedUrl(embedUrl);
+    } else {
+      alert('Invalid YouTube Playlist URL');
+    }
+  };
+
   return (
-    <div>
-      <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
+    <div className="flex justify-center items-center h-screen">
+      <div className="w-1/3">
+        <h1 className="text-3xl font-bold mb-4">YouTube Playlist Player</h1>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Enter YouTube Playlist URL"
+            className="w-full border rounded py-2 px-3 mb-4"
+            value={playlistUrl}
+            onChange={(e) => setPlaylistUrl(e.target.value)}
+          />
+          <button
+            type="submit"
+            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+          >
+            Submit
           </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="folded hands">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
+        </form>
+        {embedUrl && (
+          <div className="mt-8">
+            <iframe
+              title="YouTube Playlist"
+              width="560"
+              height="315"
+              src={embedUrl}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -43,7 +62,7 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello />} />
+        <Route path="/" element={<Player />} />
       </Routes>
     </Router>
   );
