@@ -1,21 +1,36 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import React, { useState } from 'react';
+import axios from 'axios';
+import dotenv from 'dotenv';
 import './App.css';
 import "tailwindcss/tailwind.css";
 
+dotenv.config();
+
+
 function Player() {
+
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [embedUrl, setEmbedUrl] = useState('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  
+
     const playlistIdMatch = playlistUrl.match(/list=([^&]+)/);
     if (playlistIdMatch && playlistIdMatch[1]) {
-      const playlistId = playlistIdMatch[1]!;
-     
-      const embedUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}`;
-      setEmbedUrl(embedUrl);
+      const playlistId = playlistIdMatch[1];
+      const apiKey = process.env.API_KEY;
+      const apiUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${apiKey}`;
+
+      try {
+        const response = await axios.get(apiUrl);
+        const playlistTitle = response.data.items[0].snippet.title;
+        const embedUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}`;
+        setEmbedUrl(embedUrl);
+      } catch (error) {
+        console.error('Error fetching playlist:', error);
+        alert('Error fetching playlist. Please check the URL or try again later.');
+      }
     } else {
       alert('Invalid YouTube Playlist URL');
     }
@@ -39,7 +54,6 @@ function Player() {
           >
             Submit
           </button>
-
         </form>
         {embedUrl && (
           <div className="mt-8">
